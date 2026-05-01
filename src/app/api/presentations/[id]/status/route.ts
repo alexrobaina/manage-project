@@ -1,11 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { PresentationStatus } from "@/generated/prisma/client";
 import { NextRequest } from "next/server";
+import { requireAuth } from "@/lib/require-auth";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauth = await requireAuth();
+  if (unauth) return unauth;
   const { id } = await params;
   const body = await request.json();
 

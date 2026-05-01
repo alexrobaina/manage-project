@@ -6,7 +6,7 @@ import Link from "next/link";
 import Button from "@/app/ui/atoms/Button";
 import Badge from "@/app/ui/atoms/Badge";
 import { Card } from "@/app/ui/molecules/Card";
-import { ArrowLeft, Maximize2, Minimize2, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, Link as LinkIcon, Maximize2, Minimize2, Pencil, Trash2 } from "lucide-react";
 
 interface Presentation {
   id: string;
@@ -39,6 +39,7 @@ export default function PresentationViewPage() {
   const [presentation, setPresentation] = useState<Presentation | null>(null);
   const [loading, setLoading] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const fetchPresentation = async () => {
     const res = await fetch(`/api/presentations/${id}`);
@@ -72,6 +73,13 @@ export default function PresentationViewPage() {
       body: JSON.stringify({ status }),
     });
     setPresentation((prev) => (prev ? { ...prev, status } : null));
+  };
+
+  const handleCopyShareLink = async () => {
+    const url = `${window.location.origin}/share/${id}`;
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDelete = async () => {
@@ -140,6 +148,14 @@ export default function PresentationViewPage() {
               Edit
             </Button>
           </Link>
+          <Button variant="outline" size="sm" onClick={handleCopyShareLink}>
+            {copied ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <LinkIcon className="w-4 h-4" />
+            )}
+            {copied ? "Copiado" : "Copiar enlace público"}
+          </Button>
           <Button
             variant="outline"
             size="sm"
