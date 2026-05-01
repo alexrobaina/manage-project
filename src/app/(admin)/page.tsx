@@ -43,11 +43,21 @@ export default function HomePage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchProjects = async () => {
-    const res = await fetch("/api/projects");
-    setProjects(await res.json());
-    setLoading(false);
+    setError(null);
+    try {
+      const res = await fetch("/api/projects");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setProjects(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setProjects([]);
+      setError(e instanceof Error ? e.message : "Failed to load projects");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -109,6 +119,16 @@ export default function HomePage() {
               Create Project
             </Button>
           </form>
+        </Card>
+      )}
+
+      {error && (
+        <Card variant="default" className="mb-4 border-red-300 dark:border-red-800">
+          <CardContent>
+            <p className="text-sm text-red-600 dark:text-red-400">
+              No se pudieron cargar los proyectos: {error}
+            </p>
+          </CardContent>
         </Card>
       )}
 
